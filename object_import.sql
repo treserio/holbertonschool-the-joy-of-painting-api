@@ -1,7 +1,9 @@
-
+set global local_infile=true;
+CREATE DATABASE IF NOT EXISTS bob_ross;
 USE bob_ross;
 CREATE TABLE IF NOT EXISTS objects (
-	episode VARCHAR(60),
+	episode VARCHAR(10),
+	title VARCHAR(60), 
 	apple_frame BOOLEAN,
 	aurora_borealis BOOLEAN,
 	barn BOOLEAN,
@@ -70,7 +72,11 @@ CREATE TABLE IF NOT EXISTS objects (
 	wood_framed BOOLEAN
 );
 
-LOAD DATA
+LOAD DATA LOCAL
 	INFILE "TJOP - Subject Matter"
 	INTO TABLE objects
-	IGNORE 1 LINES
+	FIELDS TERMINATED BY ','
+	IGNORE 1 LINES;
+
+ALTER TABLE objects DROP COLUMN title;
+set global local_infile=false;

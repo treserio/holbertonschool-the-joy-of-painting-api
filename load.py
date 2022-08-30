@@ -2,9 +2,11 @@ import pandas as pd
 import re
 from datetime import datetime
 from sqlalchemy import create_engine
-from sqlalchemy.sql import select
-# bob_ross database must be setup first before this will run
-engine = create_engine('mysql://root@localhost:3306/bob_ross')
+
+# Prep for running load.py
+# bob_ross database must be setup first
+# index needs to be added as the column name to the first field in 'TJOP - Colors Used'
+engine = create_engine('mysql://root:root@localhost:3306/bob_ross')
 
 colors_used = pd.read_csv('./TJOP - Colors Used')
 subject_matter = pd.read_csv('./TJOP - Subject Matter')
@@ -18,6 +20,12 @@ subject_matter = pd.read_csv('./TJOP - Subject Matter')
 #   get our list of episode strings to use for joins in most tables, and set to a pandas dataframe
 ###
 episode_DF = subject_matter['EPISODE']
+
+###
+#   create subjects table without the TITLE field
+###
+subject_matter.drop(['TITLE'], axis=1, inplace=True)
+subject_matter.to_sql('subjects', con=engine, if_exists='replace')
 
 ###
 #   create the pic_info table by filtering and adding various column data with pandas dataframes
@@ -53,7 +61,7 @@ main_drop_list = [
 ]
 
 # create a clean dataframe to use for our main import
-main_DF = colors_used.drop(main_drop_list, axis = 1)
+main_DF = colors_used.drop(main_drop_list, axis=1)
 # rename the episode column to allow the use of the EPISODE column
 main_DF.columns = main_DF.columns.str.replace('episode', 'episode_num')
 # concatonate all data frames into a single import source
@@ -67,7 +75,7 @@ main_import.to_sql('pic_info', con=engine, if_exists='replace')
 ###
 colors_drop_list = ['index', 'painting_index', 'img_src', 'painting_title', 'season', 'episode', 'num_colors', 'youtube_src', 'colors', 'color_hex']
 # concate the episode_DF with the dataframe of dropped columns from colors_used
-colors_import = pd.concat([episode_DF, colors_used.drop(colors_drop_list, axis = 1)], axis=1)
+colors_import = pd.concat([episode_DF, colors_used.drop(colors_drop_list, axis=1)], axis=1)
 # print(colors_import.columns)
 # create our table using to_sql
 colors_import.to_sql('colors', con=engine, if_exists='replace')
@@ -80,11 +88,11 @@ hex_DF = colors_used[['colors', 'color_hex']]
 # setup key value pairs based on string input from rows of hex_DF, all col values of hex_DF start as strings
 hex_colors = {}
 for k, v in hex_DF.iterrows():
-    color_list = v.colors[1:-1].translate({ord(c): None for c in "'\\rn"}).split(', ')
-    hex_list = v.color_hex[1:-1].translate({ord(c): None for c in "'\\rn"}).split(', ')
+    color_list = v.colors[1:-1].replace("'", '').replace('\\r', '').replace('\\n', '').split(', ')
+    hex_list = v.color_hex[1:-1].replace("'", '').replace('\\r', '').replace('\\n', '').split(', ')
     hex_colors.update({color_list[i]:hex_list[i] for i in range(len(color_list))})
 hex_import = pd.DataFrame({'color': hex_colors.keys(), 'hex': hex_colors.values()})
-hex_import.to_sql('colors_hex', con=engine, if_exists='replace')
+hex_import.to_sql('hex_values', con=engine, if_exists='replace')
 
 ###
 #   working with sqlAlchemy cursor example, get the list of colors from the colors table
@@ -94,7 +102,7 @@ hex_import.to_sql('colors_hex', con=engine, if_exists='replace')
 # ret_val = conn.execute(sql_exec).mappings().all()[0]
 # print(ret_val)
 # return_colors = [ k for k, v in ret_val.items() if v == 1 ]
-# print('\return_colors\n', return_colors)
+# print('\nreturn_colors\n', return_colors)
 # # close our sql connection
 # conn.close()
 

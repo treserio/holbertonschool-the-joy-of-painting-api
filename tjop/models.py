@@ -9,8 +9,8 @@ from django.db import models
 
 
 class Colors(models.Model):
-    index = models.BigIntegerField(blank=True, null=False, primary_key=True)
-    episode = models.TextField(db_column='EPISODE', blank=True, null=True)  # Field name made lowercase.
+    index = models.BigIntegerField(blank=True, null=True)
+    episode = models.CharField(db_column='EPISODE', primary_key=True, max_length=30)  # Field name made lowercase.
     black_gesso = models.BigIntegerField(db_column='Black_Gesso', blank=True, null=True)  # Field name made lowercase.
     bright_red = models.BigIntegerField(db_column='Bright_Red', blank=True, null=True)  # Field name made lowercase.
     burnt_umber = models.BigIntegerField(db_column='Burnt_Umber', blank=True, null=True)  # Field name made lowercase.
@@ -36,7 +36,7 @@ class Colors(models.Model):
 
 
 class HexValues(models.Model):
-    index = models.BigIntegerField(blank=True, null=False, primary_key=True)
+    index = models.BigIntegerField(blank=True, null=True)
     color = models.TextField(blank=True, null=True)
     hex = models.TextField(blank=True, null=True)
 
@@ -46,8 +46,9 @@ class HexValues(models.Model):
 
 
 class PicInfo(models.Model):
-    index = models.BigIntegerField(blank=True, null=False, primary_key=True)
-    episode = models.TextField(db_column='EPISODE', blank=True, null=True)  # Field name made lowercase.
+    index = models.BigIntegerField(blank=True, null=True)
+    episode = models.ForeignKey('Colors', models.DO_NOTHING, db_column='EPISODE', blank=True, null=True)  # Field name made lowercase.
+    episode = models.ForeignKey('Subjects', models.DO_NOTHING, db_column='EPISODE', blank=True, null=True)  # Field name made lowercase.
     painting_index = models.BigIntegerField(blank=True, null=True)
     img_src = models.TextField(blank=True, null=True)
     painting_title = models.TextField(blank=True, null=True)
@@ -63,8 +64,8 @@ class PicInfo(models.Model):
 
 
 class Subjects(models.Model):
-    index = models.BigIntegerField(blank=True, null=False, primary_key=True)
-    episode = models.TextField(db_column='EPISODE', blank=True, null=True)  # Field name made lowercase.
+    index = models.BigIntegerField(blank=True, null=True)
+    episode = models.CharField(db_column='EPISODE', primary_key=True, max_length=30)  # Field name made lowercase.
     apple_frame = models.BigIntegerField(db_column='APPLE_FRAME', blank=True, null=True)  # Field name made lowercase.
     aurora_borealis = models.BigIntegerField(db_column='AURORA_BOREALIS', blank=True, null=True)  # Field name made lowercase.
     barn = models.BigIntegerField(db_column='BARN', blank=True, null=True)  # Field name made lowercase.

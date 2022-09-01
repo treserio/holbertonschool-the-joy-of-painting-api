@@ -6,10 +6,12 @@ from sqlalchemy import create_engine
 # Prep for running load.py
 # bob_ross database must be setup first
 # index needs to be added as the column name to the first field in 'TJOP - Colors Used'
-engine = create_engine('mysql://root:root@localhost:3306/bob_ross')
+engine = create_engine('mysql://root@localhost:3306/bob_ross')
 
 colors_used = pd.read_csv('./TJOP - Colors Used')
 subject_matter = pd.read_csv('./TJOP - Subject Matter')
+sub_matter2 = pd.read_csv('./TJOP - Subject Matter')
+sub_matter3 = pd.read_csv('./TJOP - Subject Matter')
 
 # print(colors_used)
 # print(type(colors_used))
@@ -20,6 +22,12 @@ subject_matter = pd.read_csv('./TJOP - Subject Matter')
 #   get our list of episode strings to use for joins in most tables, and set to a pandas dataframe
 ###
 episode_DF = subject_matter['EPISODE']
+epi_subjs = sub_matter2['EPISODE']
+epi_colors = sub_matter3['EPISODE']
+epi_subjs.name = 'episode_subjects'
+epi_colors.name = 'episode_colors'
+print(epi_subjs, '\n\n', epi_colors)
+print(epi_colors.name, epi_subjs.name, episode_DF.name)
 
 ###
 #   create subjects table without the TITLE field
@@ -37,27 +45,27 @@ date_DF = pd.DataFrame()
 date_DF['air_date'] = date_objects
 
 main_drop_list = [
-'index',
-'Black_Gesso',
-'Bright_Red',
-'Burnt_Umber',
-'Cadmium_Yellow',
-'Dark_Sienna',
-'Indian_Red',
-'Indian_Yellow',
-'Liquid_Black',
-'Liquid_Clear',
-'Midnight_Black',
-'Phthalo_Blue',
-'Phthalo_Green',
-'Prussian_Blue',
-'Sap_Green',
-'Titanium_White',
-'Van_Dyke_Brown',
-'Yellow_Ochre',
-'Alizarin_Crimson',
-'colors',
-'color_hex',
+    'index',
+    'Black_Gesso',
+    'Bright_Red',
+    'Burnt_Umber',
+    'Cadmium_Yellow',
+    'Dark_Sienna',
+    'Indian_Red',
+    'Indian_Yellow',
+    'Liquid_Black',
+    'Liquid_Clear',
+    'Midnight_Black',
+    'Phthalo_Blue',
+    'Phthalo_Green',
+    'Prussian_Blue',
+    'Sap_Green',
+    'Titanium_White',
+    'Van_Dyke_Brown',
+    'Yellow_Ochre',
+    'Alizarin_Crimson',
+    'colors',
+    'color_hex',
 ]
 
 # create a clean dataframe to use for our main import
@@ -65,7 +73,7 @@ main_DF = colors_used.drop(main_drop_list, axis=1)
 # rename the episode column to allow the use of the EPISODE column
 main_DF.columns = main_DF.columns.str.replace('episode', 'episode_num')
 # concatonate all data frames into a single import source
-main_import = pd.concat([episode_DF, main_DF, date_DF], axis=1)
+main_import = pd.concat([epi_colors, epi_subjs, main_DF, date_DF], axis=1)
 # print(main_import.columns)
 # create our table using to_sql
 main_import.to_sql('pic_info', con=engine, if_exists='replace')

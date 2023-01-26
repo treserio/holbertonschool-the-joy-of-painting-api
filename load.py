@@ -6,7 +6,7 @@ from sqlalchemy import create_engine
 # Prep for running load.py
 # bob_ross database must be setup first
 # index needs to be added as the column name to the first field in 'TJOP - Colors Used'
-engine = create_engine('mysql://root@localhost:3306/bob_ross')
+engine = create_engine('mysql://root:root@localhost:3306/bob_ross')
 
 colors_used = pd.read_csv('./TJOP - Colors Used')
 subject_matter = pd.read_csv('./TJOP - Subject Matter')
